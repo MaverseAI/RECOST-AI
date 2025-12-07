@@ -3,13 +3,16 @@ import {
   Property, 
   ProcessingStatus, 
   ExtractedInvoiceData, 
-  InvoiceRecord 
+  InvoiceRecord,
+  User 
 } from './types';
 import { extractInvoiceData } from './services/geminiService';
 import { getProperties, saveProperty, uploadInvoiceToCloud, getRecentInvoices } from './services/cloudService';
+import { authService } from './services/authService';
 import { Spinner } from './components/Spinner';
 import { PropertyManager } from './components/PropertyManager';
 import { SettingsModal } from './components/SettingsModal';
+import { Login } from './components/Login';
 
 const App: React.FC = () => {
   // Theme State
@@ -17,6 +20,10 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('profit_lens_theme');
     return saved === 'dark';
   });
+
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   // App State
   const [status, setStatus] = useState<ProcessingStatus>(ProcessingStatus.IDLE);
@@ -35,15 +42,32 @@ const App: React.FC = () => {
   const [lastUploadLink, setLastUploadLink] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Deep Link Handler
+  const checkDeepLink = () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'new') {
+      setStatus(ProcessingStatus.SELECT_METHOD);
+    }
+  };
+
   // Initialize
   useEffect(() => {
-    const loadInitialData = async () => {
-      const props = await getProperties();
-      setProperties(props);
-      setHistory(getRecentInvoices());
-    };
-    loadInitialData();
+    // Check for logged in user
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+    setIsAuthLoading(false);
+
+    if (user) {
+      loadAppData();
+      checkDeepLink();
+    }
   }, []);
+
+  const loadAppData = async () => {
+    const props = await getProperties();
+    setProperties(props);
+    setHistory(getRecentInvoices());
+  };
 
   // Theme Toggle Effect
   useEffect(() => {
@@ -53,6 +77,19 @@ const App: React.FC = () => {
 
   // Handlers
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    loadAppData();
+    checkDeepLink();
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setCurrentUser(null);
+    setStatus(ProcessingStatus.IDLE);
+    setInvoiceData(null);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -306,7 +343,11 @@ const App: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
             <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 bg-gradient-to-br from-blue-500 to-indigo-600`}>
-               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+               {/* Corrected Camera Icon */}
+               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+               </svg>
             </div>
             <div className="ml-6">
               <span className={`block text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -565,6 +606,43 @@ const App: React.FC = () => {
     </div>
   );
 
+  // Loading State
+  if (isAuthLoading) {
+    return (
+      <div className={styles.appContainer}>
+         {styles.backgroundBlobs}
+         <div className="flex items-center justify-center min-h-screen">
+             <Spinner isDarkMode={isDarkMode} />
+         </div>
+      </div>
+    );
+  }
+
+  // LOGIN SCREEN
+  if (!currentUser) {
+      return (
+          <div className={styles.appContainer}>
+             {styles.backgroundBlobs}
+              {/* Theme Toggle Button for Login Screen */}
+             <div className="absolute top-6 right-6 z-50">
+                <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-900 shadow-sm'}`}>
+                    {isDarkMode ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    )}
+                </button>
+             </div>
+             <Login onLoginSuccess={handleLoginSuccess} isDarkMode={isDarkMode} />
+          </div>
+      )
+  }
+
+  // MAIN APP
   return (
     <div className={styles.appContainer}>
       {styles.backgroundBlobs}
@@ -577,7 +655,7 @@ const App: React.FC = () => {
              onClick={status === ProcessingStatus.SELECT_METHOD ? () => setStatus(ProcessingStatus.IDLE) : undefined}
           >
             {/* LOGO */}
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 group-hover:rotate-6 ${isDarkMode ? 'bg-[#1C1C1E] border border-gray-700' : 'bg-white border border-gray-100'}`}>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 ${isDarkMode ? 'bg-[#1C1C1E] border border-gray-700' : 'bg-white border border-gray-100'}`}>
                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
                   <defs>
                     <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
@@ -616,7 +694,7 @@ const App: React.FC = () => {
              </button>
 
              {/* Theme Toggle Button */}
-             <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-all duration-300 ${isDarkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700 hover:rotate-12' : 'bg-white text-gray-500 hover:bg-gray-100 shadow-sm hover:rotate-12'}`}>
+             <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-gray-900 shadow-sm'}`} title="Zmień motyw">
                {isDarkMode ? (
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -626,6 +704,11 @@ const App: React.FC = () => {
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                  </svg>
                )}
+             </button>
+
+             {/* Logout Button */}
+             <button onClick={handleLogout} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-gray-800 text-gray-400 hover:bg-red-500/10 hover:text-red-500' : 'bg-white text-gray-500 hover:bg-red-50 hover:text-red-600 shadow-sm'}`} title="Wyloguj">
+               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
              </button>
           </div>
         </div>
@@ -651,10 +734,11 @@ const App: React.FC = () => {
         />
       )}
 
-      {isSettingsOpen && (
+      {isSettingsOpen && currentUser && (
         <SettingsModal 
           onClose={() => setIsSettingsOpen(false)}
           isDarkMode={isDarkMode}
+          currentUser={currentUser}
         />
       )}
     </div>

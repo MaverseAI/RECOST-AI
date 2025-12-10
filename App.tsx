@@ -323,6 +323,9 @@ const App: React.FC = () => {
                     <p className={`text-xs mt-1 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                        {item.date} • <span className={isDarkMode ? "text-indigo-400" : "text-indigo-600"}>{item.grossAmount.toFixed(2)} {item.currency}</span>
                     </p>
+                    <p className={`text-xs mt-1 sm:hidden font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right hidden sm:block pl-4 max-w-[40%] truncate">
@@ -533,7 +536,7 @@ const App: React.FC = () => {
                 />
               </div>
               <div className={styles.listGroupItem}>
-                <label className={styles.label}>Numer</label>
+                <label className={styles.label}>{isManualMode ? 'Opis' : 'Numer'}</label>
                 <input 
                   type="text" 
                   value={invoiceData.invoiceNumber}

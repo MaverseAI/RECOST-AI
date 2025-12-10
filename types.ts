@@ -16,6 +16,11 @@ export interface ExtractedInvoiceData {
   currency: string;
 }
 
+export interface KsefInvoice extends ExtractedInvoiceData {
+  id: string;
+  suggestedCategory?: string; // AI suggestion (e.g. "Materiały budowlane")
+}
+
 export enum ProcessingStatus {
   IDLE = 'IDLE',
   SELECT_METHOD = 'SELECT_METHOD',
@@ -23,7 +28,8 @@ export enum ProcessingStatus {
   REVIEW = 'REVIEW',
   UPLOADING = 'UPLOADING',
   SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
+  KSEF_INBOX = 'KSEF_INBOX'
 }
 
 export interface InvoiceRecord extends ExtractedInvoiceData {

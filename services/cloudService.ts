@@ -1,4 +1,4 @@
-import { InvoiceRecord, Property, ExtractedInvoiceData } from "../types";
+import { InvoiceRecord, Property, ExtractedInvoiceData, KsefInvoice } from "../types";
 
 /**
  * NOTE: In a real production app, this file would communicate with a backend server
@@ -95,7 +95,7 @@ export const uploadInvoiceToCloud = async (
       } catch (e) {
         reject(e);
       }
-    }, 2000); // 2 second upload simulation
+    }, 1000); // 1 second upload simulation
   });
 };
 
@@ -103,3 +103,49 @@ export const getRecentInvoices = (): InvoiceRecord[] => {
     const historyRaw = localStorage.getItem(STORAGE_KEY_INVOICES);
     return historyRaw ? JSON.parse(historyRaw) : [];
 }
+
+// --- KSeF Mock ---
+
+export const getPendingKsefInvoices = async (): Promise<KsefInvoice[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Mock data as per prompt
+      const mockData: KsefInvoice[] = [
+        {
+          id: 'ksef_1',
+          sellerName: 'Castorama Polska Sp. z o.o.',
+          invoiceNumber: 'FV/2025/12/10/001',
+          date: '2025-12-10',
+          netAmount: 1000.41,
+          vatAmount: 230.09,
+          grossAmount: 1230.50,
+          currency: 'PLN',
+          suggestedCategory: 'Materiały budowlane'
+        },
+        {
+          id: 'ksef_2',
+          sellerName: 'Hurtownia Elektryczna MEGAWAT',
+          invoiceNumber: 'HE/55/2025',
+          date: '2025-12-11',
+          netAmount: 450.00,
+          vatAmount: 103.50,
+          grossAmount: 553.50,
+          currency: 'PLN',
+          suggestedCategory: 'Instalacje'
+        },
+        {
+            id: 'ksef_3',
+            sellerName: 'PGE Obrót S.A.',
+            invoiceNumber: 'PGE/123123/2025',
+            date: '2025-12-12',
+            netAmount: 200.00,
+            vatAmount: 46.00,
+            grossAmount: 246.00,
+            currency: 'PLN',
+            suggestedCategory: 'Media'
+        }
+      ];
+      resolve(mockData);
+    }, 800);
+  });
+};

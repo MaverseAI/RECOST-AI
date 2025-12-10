@@ -119,8 +119,7 @@ export const getPendingKsefInvoices = async (): Promise<KsefInvoice[]> => {
           netAmount: 1000.41,
           vatAmount: 230.09,
           grossAmount: 1230.50,
-          currency: 'PLN',
-          suggestedCategory: 'Materiały budowlane'
+          currency: 'PLN'
         },
         {
           id: 'ksef_2',
@@ -130,8 +129,7 @@ export const getPendingKsefInvoices = async (): Promise<KsefInvoice[]> => {
           netAmount: 450.00,
           vatAmount: 103.50,
           grossAmount: 553.50,
-          currency: 'PLN',
-          suggestedCategory: 'Instalacje'
+          currency: 'PLN'
         },
         {
             id: 'ksef_3',
@@ -141,8 +139,7 @@ export const getPendingKsefInvoices = async (): Promise<KsefInvoice[]> => {
             netAmount: 200.00,
             vatAmount: 46.00,
             grossAmount: 246.00,
-            currency: 'PLN',
-            suggestedCategory: 'Media'
+            currency: 'PLN'
         }
       ];
       resolve(mockData);

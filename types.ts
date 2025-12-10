@@ -18,7 +18,7 @@ export interface ExtractedInvoiceData {
 
 export interface KsefInvoice extends ExtractedInvoiceData {
   id: string;
-  suggestedCategory?: string; // AI suggestion (e.g. "Materiały budowlane")
+  // Category removed as per requirements
 }
 
 export enum ProcessingStatus {

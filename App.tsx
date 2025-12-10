@@ -418,42 +418,47 @@ const App: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {history.slice(0, 5).map((item) => (
-                <a 
-                  key={item.id} 
-                  href={item.driveLink || '#'} 
-                  target={item.driveLink ? "_blank" : "_self"}
-                  rel={item.driveLink ? "noopener noreferrer" : ""}
-                  className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0 ${!item.driveLink ? 'cursor-default pointer-events-none' : ''}`}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3.5 rounded-2xl shadow-sm transition-colors ${isDarkMode ? 'bg-[#2C2C2E] group-hover:bg-[#3A3A3C]' : 'bg-gray-50 group-hover:bg-white'}`}>
-                      {item.fileMimeType === 'application/pdf' ? (
-                         <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
-                      ) : item.fileMimeType ? (
-                         <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
-                      ) : (
-                         // Manual Entry Icon (Document with pencil or similar)
-                         <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                      )}
+              {history.slice(0, 5).map((item) => {
+                // Determine link target (Drive or Sheet)
+                const targetLink = item.driveLink || "https://docs.google.com/spreadsheets";
+
+                return (
+                  <a 
+                    key={item.id} 
+                    href={targetLink} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0`}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className={`p-3.5 rounded-2xl shadow-sm transition-colors ${isDarkMode ? 'bg-[#2C2C2E] group-hover:bg-[#3A3A3C]' : 'bg-gray-50 group-hover:bg-white'}`}>
+                        {item.fileMimeType === 'application/pdf' ? (
+                          <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
+                        ) : item.fileMimeType ? (
+                          <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
+                        ) : (
+                          // Manual Entry Icon (Document with pencil or similar)
+                          <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.sellerName || 'Nieznany sprzedawca'}</p>
+                        <p className={`text-xs mt-1 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {item.date} • <span className={isDarkMode ? "text-indigo-400" : "text-indigo-600"}>{item.grossAmount.toFixed(2)} {item.currency}</span>
+                        </p>
+                        <p className={`text-xs mt-1 sm:hidden font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                          {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.sellerName || 'Nieznany sprzedawca'}</p>
-                      <p className={`text-xs mt-1 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                         {item.date} • <span className={isDarkMode ? "text-indigo-400" : "text-indigo-600"}>{item.grossAmount.toFixed(2)} {item.currency}</span>
-                      </p>
-                      <p className={`text-xs mt-1 sm:hidden font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <div className="text-right hidden sm:block pl-4 max-w-[40%] truncate">
+                      <p className={`text-xs font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                         {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
                       </p>
                     </div>
-                  </div>
-                  <div className="text-right hidden sm:block pl-4 max-w-[40%] truncate">
-                     <p className={`text-xs font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
-                    </p>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           )}
         </div>
@@ -514,11 +519,6 @@ const App: React.FC = () => {
                                     <span className={`block text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         {invoice.grossAmount.toFixed(2)} {invoice.currency}
                                     </span>
-                                    {invoice.suggestedCategory && (
-                                        <span className={`inline-block mt-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`}>
-                                            {invoice.suggestedCategory}
-                                        </span>
-                                    )}
                                 </div>
                             </div>
 

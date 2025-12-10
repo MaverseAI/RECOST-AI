@@ -74,6 +74,14 @@ const App: React.FC = () => {
     setProperties(props);
     setHistory(getRecentInvoices());
     
+    // Fetch KSeF data on load to update the dashboard counter immediately
+    try {
+        const ksefPending = await getPendingKsefInvoices();
+        setKsefInvoices(ksefPending);
+    } catch (e) {
+        console.error("Failed to load KSeF data on startup", e);
+    }
+
     // Set default property to the first one available or previously selected
     if (props.length > 0 && !selectedPropertyId) {
         setSelectedPropertyId(props[0].id);
@@ -190,7 +198,9 @@ const App: React.FC = () => {
   // --- KSeF Logic ---
 
   const handleOpenKsef = async () => {
-      setStatus(ProcessingStatus.ANALYZING); // Reusing analyzing spinner
+      // If we already have invoices from initial load, just switch view. 
+      // Otherwise fetch again (or refresh). Here we fetch to ensure fresh data.
+      setStatus(ProcessingStatus.ANALYZING);
       try {
           const invoices = await getPendingKsefInvoices();
           setKsefInvoices(invoices);
@@ -250,7 +260,9 @@ const App: React.FC = () => {
     // Keep selectedPropertyId as "Last Used"
     setLastUploadLink(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    setKsefInvoices([]);
+    
+    // Refresh KSeF count on dashboard return
+    getPendingKsefInvoices().then(setKsefInvoices);
   };
 
   const openPropertyManager = (tab: 'list' | 'add') => {
@@ -322,123 +334,132 @@ const App: React.FC = () => {
 
   // --- RENDER HELPERS ---
 
-  const renderDashboard = () => (
-    <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto pb-20">
-      
-      {/* 1. KSeF Button (Enabled) */}
-      <button 
-        onClick={handleOpenKsef}
-        className="w-full relative overflow-hidden rounded-3xl p-6 shadow-2xl transition-all group hover:scale-[1.01] mb-2 cursor-pointer"
-      >
-        {/* Intense Gradient Background */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-[#8E2DE2] to-[#4A00E0] opacity-100`}></div>
+  const renderDashboard = () => {
+    const ksefCount = ksefInvoices.length;
+    const hasPendingKsef = ksefCount > 0;
+
+    return (
+      <div className="space-y-6 animate-fade-in-up max-w-2xl mx-auto pb-20">
         
-        {/* Decorative Background Icon */}
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-           <svg className="w-40 h-40 transform rotate-12 -mr-8 -mt-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>
-        </div>
-
-        <div className="relative z-10 flex items-center justify-between text-white">
-          <div className="text-left">
-             <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full mb-3 border border-white/10">
-               <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-               </span>
-               <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/90">Wymagane działanie</span>
-             </div>
-             <h2 className="text-2xl font-extrabold tracking-tight">Nowe Faktury z KSeF</h2>
-             <p className="text-white/80 text-sm font-medium mt-1">Pobierz oficjalne dokumenty rządowe</p>
+        {/* 1. KSeF Button (Dynamic UI) */}
+        <button 
+          onClick={handleOpenKsef}
+          className="w-full relative overflow-hidden rounded-3xl p-6 shadow-2xl transition-all group hover:scale-[1.01] mb-2 cursor-pointer"
+        >
+          {/* Intense Gradient Background */}
+          <div className={`absolute inset-0 bg-gradient-to-br from-[#8E2DE2] to-[#4A00E0] opacity-100`}></div>
+          
+          {/* Decorative Background Icon */}
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <svg className="w-40 h-40 transform rotate-12 -mr-8 -mt-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>
           </div>
-          <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md shadow-inner border border-white/20">
-             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+
+          <div className="relative z-10 flex flex-col items-center justify-center text-center text-white">
+            
+            {/* Status Badge */}
+            <div className={`inline-flex items-center space-x-2 backdrop-blur-md px-3 py-1 rounded-full mb-3 border ${hasPendingKsef ? 'bg-white/20 border-white/10' : 'bg-green-500/20 border-green-500/20'}`}>
+              <span className="relative flex h-2.5 w-2.5">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${hasPendingKsef ? 'bg-orange-400' : 'bg-green-400'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${hasPendingKsef ? 'bg-orange-500' : 'bg-green-500'}`}></span>
+              </span>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/90">
+                {hasPendingKsef ? 'Wymagane działanie' : 'System gotowy'}
+              </span>
+            </div>
+
+            <h2 className="text-3xl font-extrabold tracking-tight mb-2">Nowe Faktury z KSeF</h2>
+            <p className="text-white/90 text-sm font-medium">
+               {hasPendingKsef 
+                 ? `Liczba dokumentów do akceptacji: ${ksefCount}` 
+                 : 'Wszystkie dokumenty zostały przetworzone'}
+            </p>
           </div>
-        </div>
-      </button>
+        </button>
 
-      {/* 2. Main Action - Add Cost (Moved Up) */}
-      <button 
-        onClick={() => setStatus(ProcessingStatus.SELECT_METHOD)}
-        className={styles.buttonPrimary}
-      >
-        <div className="bg-white/20 p-2.5 rounded-full backdrop-blur-sm">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-        </div>
-        <span>Dodaj Nowy Koszt</span>
-      </button>
-
-      {/* 3. Header Card - Property Database (Moved Down) */}
-      <button 
-        onClick={() => openPropertyManager('list')}
-        className={`${styles.card} w-full relative overflow-hidden group flex flex-col items-center justify-center text-center py-8 hover:scale-[1.02] cursor-pointer`}
-      >
-        {/* Glow effect on hover */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-indigo-500/30"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -ml-16 -mb-16 transition-all duration-500 group-hover:bg-blue-500/30"></div>
-        
-        <div className="relative z-10">
-          <h2 className={styles.sectionTitle}>
-            Baza Nieruchomości
-          </h2>
-          <p className={`${styles.subTitle} mt-2`}>
-            {properties.filter(p => !p.isArchived).length} {properties.filter(p => !p.isArchived).length === 1 ? 'aktywny adres' : 'aktywnych adresów'}
-          </p>
-        </div>
-      </button>
-
-      {/* Recent Activity */}
-      <div className="pt-2">
-        <h3 className={`text-xl font-bold mb-4 px-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Ostatnie skany
-        </h3>
-        
-        {history.length === 0 ? (
-          <div className={`text-center py-16 rounded-3xl border border-dashed ${isDarkMode ? "bg-white/5 border-white/10 text-gray-500" : "bg-white border-gray-200 text-gray-400"}`}>
-            Brak historii skanów.
+        {/* 2. Main Action - Add Cost */}
+        <button 
+          onClick={() => setStatus(ProcessingStatus.SELECT_METHOD)}
+          className={styles.buttonPrimary}
+        >
+          <div className="bg-white/20 p-2.5 rounded-full backdrop-blur-sm">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {history.slice(0, 5).map((item) => (
-              <a 
-                key={item.id} 
-                href={item.driveLink || '#'} 
-                target={item.driveLink ? "_blank" : "_self"}
-                rel={item.driveLink ? "noopener noreferrer" : ""}
-                className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0 ${!item.driveLink ? 'cursor-default pointer-events-none' : ''}`}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3.5 rounded-2xl shadow-sm transition-colors ${isDarkMode ? 'bg-[#2C2C2E] group-hover:bg-[#3A3A3C]' : 'bg-gray-50 group-hover:bg-white'}`}>
-                    {item.fileMimeType === 'application/pdf' ? (
-                       <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
-                    ) : item.fileMimeType ? (
-                       <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
-                    ) : (
-                       // Manual Entry Icon (Document with pencil or similar)
-                       <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                    )}
+          <span>Dodaj Nowy Koszt</span>
+        </button>
+
+        {/* 3. Header Card - Property Database */}
+        <button 
+          onClick={() => openPropertyManager('list')}
+          className={`${styles.card} w-full relative overflow-hidden group flex flex-col items-center justify-center text-center py-8 hover:scale-[1.02] cursor-pointer`}
+        >
+          {/* Glow effect on hover */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-500 group-hover:bg-indigo-500/30"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -ml-16 -mb-16 transition-all duration-500 group-hover:bg-blue-500/30"></div>
+          
+          <div className="relative z-10">
+            <h2 className={styles.sectionTitle}>
+              Baza Nieruchomości
+            </h2>
+            <p className={`${styles.subTitle} mt-2`}>
+              {properties.filter(p => !p.isArchived).length} {properties.filter(p => !p.isArchived).length === 1 ? 'aktywny adres' : 'aktywnych adresów'}
+            </p>
+          </div>
+        </button>
+
+        {/* Recent Activity */}
+        <div className="pt-2">
+          <h3 className={`text-xl font-bold mb-4 px-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Ostatnie skany
+          </h3>
+          
+          {history.length === 0 ? (
+            <div className={`text-center py-16 rounded-3xl border border-dashed ${isDarkMode ? "bg-white/5 border-white/10 text-gray-500" : "bg-white border-gray-200 text-gray-400"}`}>
+              Brak historii skanów.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {history.slice(0, 5).map((item) => (
+                <a 
+                  key={item.id} 
+                  href={item.driveLink || '#'} 
+                  target={item.driveLink ? "_blank" : "_self"}
+                  rel={item.driveLink ? "noopener noreferrer" : ""}
+                  className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0 ${!item.driveLink ? 'cursor-default pointer-events-none' : ''}`}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-3.5 rounded-2xl shadow-sm transition-colors ${isDarkMode ? 'bg-[#2C2C2E] group-hover:bg-[#3A3A3C]' : 'bg-gray-50 group-hover:bg-white'}`}>
+                      {item.fileMimeType === 'application/pdf' ? (
+                         <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
+                      ) : item.fileMimeType ? (
+                         <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
+                      ) : (
+                         // Manual Entry Icon (Document with pencil or similar)
+                         <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.sellerName || 'Nieznany sprzedawca'}</p>
+                      <p className={`text-xs mt-1 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                         {item.date} • <span className={isDarkMode ? "text-indigo-400" : "text-indigo-600"}>{item.grossAmount.toFixed(2)} {item.currency}</span>
+                      </p>
+                      <p className={`text-xs mt-1 sm:hidden font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                        {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.sellerName || 'Nieznany sprzedawca'}</p>
-                    <p className={`text-xs mt-1 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                       {item.date} • <span className={isDarkMode ? "text-indigo-400" : "text-indigo-600"}>{item.grossAmount.toFixed(2)} {item.currency}</span>
-                    </p>
-                    <p className={`text-xs mt-1 sm:hidden font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div className="text-right hidden sm:block pl-4 max-w-[40%] truncate">
+                     <p className={`text-xs font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
                     </p>
                   </div>
-                </div>
-                <div className="text-right hidden sm:block pl-4 max-w-[40%] truncate">
-                   <p className={`text-xs font-bold ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {properties.find(p => p.id === item.propertyId)?.address || 'Nieznany adres'}
-                  </p>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderKsefInbox = () => {
     const activeProperties = properties.filter(p => !p.isArchived);

@@ -55,16 +55,22 @@ export const saveProperty = async (property: Property): Promise<Property> => {
 // --- Invoice Processing (Mocking Drive & Sheets) ---
 
 export const uploadInvoiceToCloud = async (
-  invoiceData: ExtractedInvoiceData & { propertyId: string; fileData: string; mimeType: string }
-): Promise<{ driveLink: string; sheetRow: number }> => {
+  invoiceData: ExtractedInvoiceData & { propertyId: string; fileData?: string; mimeType?: string }
+): Promise<{ driveLink?: string; sheetRow: number }> => {
   
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try {
-        // 1. Mock Upload to Google Drive
-        // In real app: Drive API files.create() into specific folder ID
-        // We would use invoiceData.mimeType here to set the correct content type
-        const driveLink = `https://drive.google.com/drive/folders/mock_id_${Math.floor(Math.random() * 1000)}`;
+        let driveLink: string | undefined = undefined;
+
+        // 1. Mock Upload to Google Drive (Only if file exists)
+        if (invoiceData.fileData && invoiceData.mimeType) {
+            // In real app: Drive API files.create() into specific folder ID
+            driveLink = `https://drive.google.com/drive/folders/mock_id_${Math.floor(Math.random() * 1000)}`;
+            console.log(`[MOCK CLOUD] Uploaded ${invoiceData.mimeType} to Drive Folder for Property ${invoiceData.propertyId}`);
+        } else {
+            console.log(`[MOCK CLOUD] Manual entry - skipping Drive upload`);
+        }
 
         // 2. Mock Append to Google Sheet
         // In real app: Sheets API spreadsheets.values.append()
@@ -76,13 +82,13 @@ export const uploadInvoiceToCloud = async (
         const newRecord: InvoiceRecord = {
             ...invoiceData,
             id: Date.now().toString(),
-            fileMimeType: invoiceData.mimeType,
+            fileMimeType: invoiceData.mimeType || '',
+            fileData: invoiceData.fileData || undefined,
             driveLink,
             sheetRow
         };
         localStorage.setItem(STORAGE_KEY_INVOICES, JSON.stringify([newRecord, ...history]));
 
-        console.log(`[MOCK CLOUD] Uploaded ${invoiceData.mimeType} to Drive Folder for Property ${invoiceData.propertyId}`);
         console.log(`[MOCK CLOUD] Appended row to Sheets:`, invoiceData);
 
         resolve({ driveLink, sheetRow });

@@ -29,8 +29,8 @@ export enum ProcessingStatus {
 export interface InvoiceRecord extends ExtractedInvoiceData {
   id: string;
   propertyId: string;
-  fileData: string; // Base64
-  fileMimeType: string;
+  fileData?: string; // Base64 - Optional for manual entry
+  fileMimeType?: string; // Optional for manual entry
   driveLink?: string; // Mock link
   sheetRow?: number; // Mock row
 }

@@ -120,6 +120,22 @@ const App: React.FC = () => {
     }
   };
 
+  // Handler for Manual Entry Mode
+  const handleManualEntry = () => {
+    setFileData(null);
+    setFileMimeType('');
+    setInvoiceData({
+        sellerName: '',
+        invoiceNumber: '',
+        date: new Date().toISOString().split('T')[0],
+        netAmount: 0,
+        vatAmount: 0,
+        grossAmount: 0, // In manual mode, user edits this directly
+        currency: 'PLN'
+    });
+    setStatus(ProcessingStatus.REVIEW);
+  };
+
   const handlePropertySave = async (prop: Property) => {
     const updated = await saveProperty(prop);
     const all = await getProperties();
@@ -130,14 +146,19 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!invoiceData || !selectedPropertyId || !fileData) {
+    // Validate: Needs data and property. File is optional now.
+    if (!invoiceData || !selectedPropertyId) {
       alert("Brakujące dane.");
       return;
     }
 
     setStatus(ProcessingStatus.UPLOADING);
     try {
-      const base64Content = fileData.split(',')[1];
+      let base64Content = undefined;
+      if (fileData) {
+        base64Content = fileData.split(',')[1];
+      }
+      
       const result = await uploadInvoiceToCloud({
         ...invoiceData,
         propertyId: selectedPropertyId,
@@ -145,7 +166,7 @@ const App: React.FC = () => {
         mimeType: fileMimeType
       });
       
-      setLastUploadLink(result.driveLink);
+      setLastUploadLink(result.driveLink || null);
       setHistory(getRecentInvoices());
       setStatus(ProcessingStatus.SUCCESS);
     } catch (error) {
@@ -282,16 +303,19 @@ const App: React.FC = () => {
               <a 
                 key={item.id} 
                 href={item.driveLink || '#'} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0`}
+                target={item.driveLink ? "_blank" : "_self"}
+                rel={item.driveLink ? "noopener noreferrer" : ""}
+                className={`${styles.card} !p-4 group hover:scale-[1.02] cursor-pointer flex items-center justify-between block decoration-0 ${!item.driveLink ? 'cursor-default pointer-events-none' : ''}`}
               >
                 <div className="flex items-center space-x-4">
                   <div className={`p-3.5 rounded-2xl shadow-sm transition-colors ${isDarkMode ? 'bg-[#2C2C2E] group-hover:bg-[#3A3A3C]' : 'bg-gray-50 group-hover:bg-white'}`}>
                     {item.fileMimeType === 'application/pdf' ? (
                        <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
-                    ) : (
+                    ) : item.fileMimeType ? (
                        <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
+                    ) : (
+                       // Manual Entry Icon (Document with pencil or similar)
+                       <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                     )}
                   </div>
                   <div>
@@ -315,7 +339,7 @@ const App: React.FC = () => {
   );
 
   const renderMethodSelection = () => (
-    <div className="flex flex-col h-[70vh] animate-fade-in-up max-w-2xl mx-auto">
+    <div className="flex flex-col animate-fade-in-up max-w-2xl mx-auto pb-10">
        <button 
          onClick={() => setStatus(ProcessingStatus.IDLE)}
          className={`self-start mb-8 flex items-center group ${styles.buttonGhost}`}
@@ -327,7 +351,7 @@ const App: React.FC = () => {
        </button>
 
        <div className="flex-1 flex flex-col items-center justify-center space-y-10">
-         <div className="text-center space-y-2">
+         <div className="text-center space-y-2 mb-4">
            <h2 className={`text-4xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Dodaj Nowy Koszt
            </h2>
@@ -387,6 +411,24 @@ const App: React.FC = () => {
               className="hidden" 
             />
           </label>
+
+           {/* MANUAL ENTRY OPTION - NEW */}
+          <button 
+             onClick={handleManualEntry}
+             className={`${styles.card} flex items-center cursor-pointer group relative overflow-hidden !p-8 hover:scale-[1.02] active:scale-95 transition-transform duration-300 text-left w-full`}
+          >
+             <div className="absolute inset-0 bg-gradient-to-r from-amber-600/10 to-orange-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+             
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-110 bg-gradient-to-br from-amber-500 to-orange-600`}>
+               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            </div>
+             <div className="ml-6">
+              <span className={`block text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                 Koszt bez dokumentu
+              </span>
+              <span className={`${styles.subTitle} mt-1 block`}>Tylko kwota i sprzedawca</span>
+            </div>
+          </button>
         </div>
        </div>
     </div>
@@ -396,36 +438,51 @@ const App: React.FC = () => {
     if (!invoiceData) return null;
     const activeProperties = properties.filter(p => !p.isArchived);
     const isPdf = fileMimeType === 'application/pdf';
+    
+    // Check if it's manual mode (no file data present)
+    const isManualMode = !fileData;
 
     return (
       <div className={`w-full max-w-2xl mx-auto animate-fade-in-up pb-20`}>
         
-        {/* Document Preview Header */}
-        <div className={`relative h-64 rounded-3xl overflow-hidden mb-8 shadow-2xl ${isDarkMode ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
-            {fileData && !isPdf && (
-              <img src={fileData} alt="Faktura" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
-            )}
-            
-            {isPdf && (
-               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                  <svg className="w-24 h-24 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
-                  <span className="text-gray-400 font-medium">Dokument PDF</span>
-               </div>
-            )}
-            
-            <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-[#050505] via-[#050505]/40' : 'from-[#F2F2F7] via-[#F2F2F7]/40'} to-transparent`}></div>
+        {/* Document Preview Header (Only show if not manual mode) */}
+        {!isManualMode && (
+            <div className={`relative h-64 rounded-3xl overflow-hidden mb-8 shadow-2xl ${isDarkMode ? 'bg-[#1C1C1E]' : 'bg-white'}`}>
+                {fileData && !isPdf && (
+                <img src={fileData} alt="Faktura" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
+                )}
+                
+                {isPdf && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                    <svg className="w-24 h-24 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
+                    <span className="text-gray-400 font-medium">Dokument PDF</span>
+                </div>
+                )}
+                
+                <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-[#050505] via-[#050505]/40' : 'from-[#F2F2F7] via-[#F2F2F7]/40'} to-transparent`}></div>
 
-            <div className="absolute bottom-0 left-0 p-8 w-full">
-              <div className="flex justify-between items-end">
+                <div className="absolute bottom-0 left-0 p-8 w-full">
+                <div className="flex justify-between items-end">
+                    <h2 className={`text-3xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Weryfikacja
+                    </h2>
+                    <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md ${isDarkMode ? 'bg-white/20 text-white' : 'bg-black/10 text-black'}`}>
+                    AI Analysis
+                    </span>
+                </div>
+                </div>
+            </div>
+        )}
+
+        {/* Manual Mode Header */}
+        {isManualMode && (
+             <div className="mb-8 px-2 text-center">
                 <h2 className={`text-3xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   Weryfikacja
                 </h2>
-                <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md ${isDarkMode ? 'bg-white/20 text-white' : 'bg-black/10 text-black'}`}>
-                  AI Analysis
-                </span>
-              </div>
-            </div>
-        </div>
+                <p className={styles.subTitle}>Wprowadź dane ręcznie</p>
+             </div>
+        )}
 
         <div className="space-y-8">
           
@@ -472,6 +529,7 @@ const App: React.FC = () => {
                   value={invoiceData.sellerName}
                   onChange={e => setInvoiceData({...invoiceData, sellerName: e.target.value})}
                   className={styles.inputTransparent}
+                  placeholder={isManualMode ? "Wpisz nazwę sprzedawcy" : ""}
                 />
               </div>
               <div className={styles.listGroupItem}>
@@ -481,6 +539,7 @@ const App: React.FC = () => {
                   value={invoiceData.invoiceNumber}
                   onChange={e => setInvoiceData({...invoiceData, invoiceNumber: e.target.value})}
                   className={styles.inputTransparent}
+                  placeholder={isManualMode ? "Opcjonalnie" : ""}
                 />
               </div>
               <div className={styles.listGroupItem}>
@@ -499,36 +558,43 @@ const App: React.FC = () => {
           <div>
             <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 px-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Kwoty</h4>
             <div className={styles.listGroupContainer}>
-               <div className={styles.listGroupItem}>
-                <label className={styles.label}>Netto</label>
-                <div className="flex items-center justify-end w-full space-x-2">
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={invoiceData.netAmount}
-                    onChange={e => setInvoiceData({...invoiceData, netAmount: parseFloat(e.target.value) || 0})}
-                    className={`${styles.inputTransparent} w-32`}
-                  />
-                  <span className={`text-sm font-medium ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{invoiceData.currency || 'PLN'}</span>
-                </div>
-              </div>
-               <div className={styles.listGroupItem}>
-                <label className={styles.label}>VAT</label>
-                <div className="flex items-center justify-end w-full space-x-2">
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={invoiceData.vatAmount}
-                    onChange={e => setInvoiceData({...invoiceData, vatAmount: parseFloat(e.target.value) || 0})}
-                    className={`${styles.inputTransparent} w-32`}
-                  />
-                  <span className={`text-sm font-medium ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{invoiceData.currency || 'PLN'}</span>
-                </div>
-              </div>
+               
+               {/* Only show Net/Vat if NOT manual mode */}
+               {!isManualMode && (
+                   <>
+                    <div className={styles.listGroupItem}>
+                        <label className={styles.label}>Netto</label>
+                        <div className="flex items-center justify-end w-full space-x-2">
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            value={invoiceData.netAmount}
+                            onChange={e => setInvoiceData({...invoiceData, netAmount: parseFloat(e.target.value) || 0})}
+                            className={`${styles.inputTransparent} w-32`}
+                        />
+                        <span className={`text-sm font-medium ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{invoiceData.currency || 'PLN'}</span>
+                        </div>
+                    </div>
+                    <div className={styles.listGroupItem}>
+                        <label className={styles.label}>VAT</label>
+                        <div className="flex items-center justify-end w-full space-x-2">
+                        <input 
+                            type="number" 
+                            step="0.01"
+                            value={invoiceData.vatAmount}
+                            onChange={e => setInvoiceData({...invoiceData, vatAmount: parseFloat(e.target.value) || 0})}
+                            className={`${styles.inputTransparent} w-32`}
+                        />
+                        <span className={`text-sm font-medium ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{invoiceData.currency || 'PLN'}</span>
+                        </div>
+                    </div>
+                   </>
+               )}
+
               {/* Gross Amount Highlight */}
               <div className={`flex items-center justify-between p-6 ${isDarkMode ? 'bg-gradient-to-r from-blue-900/20 to-indigo-900/20' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
                 <label className={`font-bold uppercase tracking-wide ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
-                   Brutto
+                   {isManualMode ? 'Kwota' : 'Brutto'}
                 </label>
                 <div className="flex items-center space-x-2">
                    <input 
@@ -582,7 +648,10 @@ const App: React.FC = () => {
           Gotowe!
         </h2>
         <p className={`${styles.subTitle} text-base leading-relaxed mb-6`}>
-          Faktura została przeanalizowana i zapisana. Dane są w Arkuszu, a plik na Dysku Google.
+          {lastUploadLink 
+            ? 'Faktura została przeanalizowana i zapisana. Dane są w Arkuszu, a plik na Dysku Google.'
+            : 'Dane kosztu zostały zapisane w Arkuszu (bez pliku).'
+          }
         </p>
         
         {lastUploadLink && (

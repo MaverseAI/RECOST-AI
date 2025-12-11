@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const [fileData, setFileData] = useState<string | null>(null); // base64
   const [fileMimeType, setFileMimeType] = useState<string>('');
   const [invoiceData, setInvoiceData] = useState<ExtractedInvoiceData | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   
   // KSeF State
   const [ksefInvoices, setKsefInvoices] = useState<KsefInvoice[]>([]);
@@ -126,11 +127,22 @@ const App: React.FC = () => {
 
   const processFile = async (base64Full: string, mimeType: string) => {
     setStatus(ProcessingStatus.ANALYZING);
+    setValidationErrors([]);
     try {
       const base64Content = base64Full.split(',')[1];
-      const result = await extractInvoiceData(base64Content, mimeType);
+      // Pass properties to Gemini for address matching
+      const result = await extractInvoiceData(base64Content, mimeType, properties);
       
       setInvoiceData(result);
+      
+      // Auto-select property if AI suggested one and it exists
+      if (result.suggestedPropertyId) {
+        const exists = properties.find(p => p.id === result.suggestedPropertyId);
+        if (exists) {
+          setSelectedPropertyId(exists.id);
+        }
+      }
+
       setStatus(ProcessingStatus.REVIEW);
     } catch (error) {
       console.error(error);
@@ -152,6 +164,7 @@ const App: React.FC = () => {
         grossAmount: 0, // In manual mode, user edits this directly
         currency: 'PLN'
     });
+    setValidationErrors([]);
     setStatus(ProcessingStatus.REVIEW);
   };
 
@@ -165,11 +178,36 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // Validate: Needs data and property. File is optional now.
-    if (!invoiceData || !selectedPropertyId) {
-      alert("Brakujące dane.");
-      return;
+    const errors: string[] = [];
+
+    // Validation
+    if (!selectedPropertyId) {
+        errors.push("Wybierz nieruchomość z listy.");
     }
+
+    if (invoiceData) {
+        if (!invoiceData.sellerName || invoiceData.sellerName.trim() === '') {
+            errors.push("Wprowadź nazwę sprzedawcy.");
+        }
+        if (!invoiceData.date) {
+            errors.push("Wprowadź datę dokumentu.");
+        }
+        // Basic check for gross amount existence (assuming it shouldn't be null/undefined, though types say number)
+        if (invoiceData.grossAmount === undefined || invoiceData.grossAmount === null) {
+            errors.push("Wprowadź kwotę brutto.");
+        }
+    } else {
+        errors.push("Brak danych faktury.");
+    }
+
+    if (errors.length > 0) {
+        setValidationErrors(errors);
+        // Scroll to errors? usually handled by layout
+        return;
+    }
+
+    // Clear errors if any were present
+    setValidationErrors([]);
 
     setStatus(ProcessingStatus.UPLOADING);
     try {
@@ -179,7 +217,7 @@ const App: React.FC = () => {
       }
       
       const result = await uploadInvoiceToCloud({
-        ...invoiceData,
+        ...invoiceData!,
         propertyId: selectedPropertyId,
         fileData: base64Content,
         mimeType: fileMimeType
@@ -257,6 +295,7 @@ const App: React.FC = () => {
     setFileData(null);
     setFileMimeType('');
     setInvoiceData(null);
+    setValidationErrors([]);
     // Keep selectedPropertyId as "Last Used"
     setLastUploadLink(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -803,7 +842,7 @@ const App: React.FC = () => {
                   type="date" 
                   value={invoiceData.date}
                   onChange={e => setInvoiceData({...invoiceData, date: e.target.value})}
-                  className={styles.inputTransparent}
+                  className={`${styles.inputTransparent} ${isDarkMode ? '[color-scheme:dark]' : '[color-scheme:light]'}`}
                 />
               </div>
             </div>
@@ -866,6 +905,21 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
+          
+          {/* Validation Errors */}
+          {validationErrors.length > 0 && (
+            <div className={`mb-6 p-4 rounded-xl border animate-fade-in-up ${isDarkMode ? 'bg-red-500/10 border-red-500/20 text-red-200' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                <div className="flex items-center space-x-2 mb-2 font-bold">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <span>Uzupełnij wymagane dane:</span>
+                </div>
+                <ul className="list-disc list-inside text-sm space-y-1 ml-1 opacity-90">
+                    {validationErrors.map((err, i) => (
+                        <li key={i}>{err}</li>
+                    ))}
+                </ul>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex space-x-4 pt-6">
@@ -877,12 +931,7 @@ const App: React.FC = () => {
              </button>
              <button 
                onClick={handleSubmit} 
-               disabled={!selectedPropertyId}
-               className={`flex-1 py-4 px-6 rounded-2xl font-bold shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 ${
-                 !selectedPropertyId 
-                   ? (isDarkMode ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed')
-                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50'
-               }`}
+               className={`flex-1 py-4 px-6 rounded-2xl font-bold shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50`}
              >
                Zatwierdź
              </button>

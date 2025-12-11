@@ -14,6 +14,7 @@ export interface ExtractedInvoiceData {
   vatAmount: number;
   grossAmount: number;
   currency: string;
+  suggestedPropertyId?: string; // AI suggestion based on address match
 }
 
 export interface KsefInvoice extends ExtractedInvoiceData {

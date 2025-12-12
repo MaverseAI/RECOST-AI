@@ -58,44 +58,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
   // Styles
   const overlayClass = isDarkMode ? 'bg-black/60' : 'bg-gray-500/30';
   const modalClass = isDarkMode 
-    ? "bg-[#1C1C1E]/90 border border-gray-700/50 text-white shadow-2xl shadow-black/50" 
-    : "bg-white/90 border border-white/50 text-gray-900 shadow-2xl shadow-blue-900/10";
+    ? "bg-slate-800/70 border border-white/10 text-white shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur-[20px]" 
+    : "bg-white/85 border border-white/50 text-[#1d1d1f] shadow-[0_4px_30px_rgba(0,0,0,0.05)] backdrop-blur-[20px]";
   
   const inputTransparent = isDarkMode
-    ? "w-full bg-transparent text-right text-white focus:outline-none placeholder-gray-600 font-medium disabled:text-gray-500 disabled:cursor-not-allowed"
-    : "w-full bg-transparent text-right text-gray-900 focus:outline-none placeholder-gray-400 font-medium disabled:text-gray-400 disabled:cursor-not-allowed";
+    ? "w-full bg-transparent text-right text-slate-50 focus:outline-none placeholder-slate-500 font-medium disabled:text-slate-500 disabled:cursor-not-allowed"
+    : "w-full bg-transparent text-right text-[#1d1d1f] focus:outline-none placeholder-gray-400 font-medium disabled:text-[#86868b] disabled:cursor-not-allowed";
     
   const inputFormClass = isDarkMode
-    ? "w-full px-4 py-3 bg-[#2C2C2E] border-none text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500"
-    : "w-full px-4 py-3 bg-gray-50 border-none text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400";
+    ? "w-full px-4 py-3 bg-slate-800 border-none text-white rounded-xl focus:ring-2 focus:ring-[#5e13f6] outline-none placeholder-slate-500"
+    : "w-full px-4 py-3 bg-gray-50 border-none text-[#1d1d1f] rounded-xl focus:ring-2 focus:ring-[#5e13f6] outline-none placeholder-gray-400";
 
   const labelClass = isDarkMode
-    ? "text-gray-400 font-medium text-sm whitespace-nowrap mr-4"
-    : "text-gray-500 font-medium text-sm whitespace-nowrap mr-4";
+    ? "text-slate-400 font-medium text-sm whitespace-nowrap mr-4"
+    : "text-[#86868b] font-medium text-sm whitespace-nowrap mr-4";
 
   const listGroupContainer = isDarkMode
-    ? "bg-[#2C2C2E] rounded-2xl overflow-hidden border border-gray-800"
-    : "bg-gray-50 rounded-2xl overflow-hidden border border-gray-200 shadow-inner";
+    ? "bg-slate-800 rounded-2xl overflow-hidden border border-slate-700"
+    : "bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm";
       
   const listGroupItem = isDarkMode
-    ? "flex items-center justify-between p-4 border-b border-gray-800 last:border-0"
-    : "flex items-center justify-between p-4 border-b border-gray-200 last:border-0";
+    ? "flex items-center justify-between p-4 border-b border-slate-700 last:border-0"
+    : "flex items-center justify-between p-4 border-b border-gray-100 last:border-0";
 
   // Tab Button Style
   const tabBtnClass = (active: boolean) => `flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
     active 
-      ? (isDarkMode ? "bg-[#3A3A3C] text-white shadow-md" : "bg-white text-gray-900 shadow-sm") 
-      : (isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-900")
+      ? (isDarkMode ? "bg-slate-700 text-white shadow-md" : "bg-white text-[#1d1d1f] shadow-sm") 
+      : (isDarkMode ? "text-slate-400 hover:text-gray-200" : "text-[#86868b] hover:text-[#1d1d1f]")
   }`;
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md transition-all duration-300 ${overlayClass}`}>
-      <div className={`w-full max-w-lg flex flex-col max-h-[90vh] glass-panel rounded-3xl overflow-hidden animate-fade-in-up ${modalClass}`}>
+      <div className={`w-full max-w-lg flex flex-col max-h-[90vh] rounded-3xl overflow-hidden animate-fade-in-up ${modalClass}`}>
         
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-500/10">
           <h3 className="font-bold text-xl tracking-tight">Ustawienia</h3>
-          <button onClick={onClose} className={`p-2 rounded-full transition-colors ${isDarkMode ? "hover:bg-white/10 text-gray-400" : "hover:bg-black/5 text-gray-500"}`}>
+          <button onClick={onClose} className={`p-2 rounded-full transition-colors ${isDarkMode ? "hover:bg-white/10 text-slate-400" : "hover:bg-black/5 text-[#86868b]"}`}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -103,7 +103,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
         {/* Tabs (Only if Admin) */}
         {isAdmin && (
            <div className="px-6 pt-4 pb-2">
-              <div className={`flex p-1 rounded-xl ${isDarkMode ? "bg-[#2C2C2E]" : "bg-gray-100"}`}>
+              <div className={`flex p-1 rounded-xl ${isDarkMode ? "bg-slate-800" : "bg-gray-100"}`}>
                  <button onClick={() => setActiveTab('general')} className={tabBtnClass(activeTab === 'general')}>Ogólne</button>
                  <button onClick={() => setActiveTab('users')} className={tabBtnClass(activeTab === 'users')}>Użytkownicy</button>
               </div>
@@ -117,16 +117,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
                 <>
                 {/* Account Section */}
                 <div className="space-y-3">
-                    <h4 className={`text-xs font-bold uppercase tracking-wider ml-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <h4 className={`text-xs font-bold uppercase tracking-wider ml-1 ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
                         Zalogowano jako
                     </h4>
-                    <div className={`flex items-center p-4 rounded-2xl border ${isDarkMode ? 'bg-[#2C2C2E] border-gray-800' : 'bg-white border-gray-200 shadow-sm'}`}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md uppercase">
+                    <div className={`flex items-center p-4 rounded-2xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200 shadow-sm'}`}>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5e13f6] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm shadow-md uppercase">
                             {currentUser.email.charAt(0)}
                         </div>
                         <div className="ml-4 flex-1">
-                            <div className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.name || 'Użytkownik'}</div>
-                            <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{currentUser.email}</div>
+                            <div className={`font-semibold text-sm ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>{currentUser.name || 'Użytkownik'}</div>
+                            <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>{currentUser.email}</div>
                         </div>
                         <div className={`text-xs font-bold px-2 py-1 rounded-full ${isAdmin ? 'bg-purple-500/10 text-purple-500' : 'bg-blue-500/10 text-blue-500'}`}>
                             {isAdmin ? 'ADMIN' : 'USER'}
@@ -136,7 +136,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
 
                 {/* Drive Configuration Section */}
                 <div className="space-y-3">
-                    <h4 className={`text-xs font-bold uppercase tracking-wider ml-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <h4 className={`text-xs font-bold uppercase tracking-wider ml-1 ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
                         Konfiguracja Dysku Google
                     </h4>
                     {!isAdmin && (
@@ -169,7 +169,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
                         </div>
                     </div>
                     {isAdmin && (
-                        <p className={`text-[10px] px-2 leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                        <p className={`text-[10px] px-2 leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
                             Te ustawienia będą stosowane dla wszystkich użytkowników aplikacji.
                         </p>
                     )}
@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
                     <div className="pt-4">
                         <button 
                             onClick={handleSaveSettings}
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
+                            className="w-full bg-gradient-to-r from-[#5e13f6] to-[#8b5cf6] text-white py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-[#5e13f6]/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
                         >
                             Zapisz Ustawienia
                         </button>
@@ -211,24 +211,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, isDarkMod
                             onChange={(e) => setNewUserEmail(e.target.value)}
                             required
                          />
-                         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors">
+                         <button type="submit" className="w-full bg-[#5e13f6] hover:bg-[#4c0cd0] text-white font-bold py-3 rounded-xl transition-colors">
                             Dodaj Użytkownika
                          </button>
                     </form>
 
                     <div className="pt-4 border-t border-gray-500/10">
-                        <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                        <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
                             Lista Użytkowników
                         </h4>
                         {subUsers.length === 0 ? (
-                            <p className={`text-center py-4 text-sm ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>Brak dodatkowych użytkowników</p>
+                            <p className={`text-center py-4 text-sm ${isDarkMode ? 'text-slate-600' : 'text-[#86868b]'}`}>Brak dodatkowych użytkowników</p>
                         ) : (
                             <div className="space-y-3">
                                 {subUsers.map(user => (
-                                    <div key={user.id} className={`flex items-center justify-between p-3 rounded-xl border ${isDarkMode ? 'bg-[#2C2C2E] border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <div key={user.id} className={`flex items-center justify-between p-3 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                                         <div>
-                                            <div className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{user.name}</div>
-                                            <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</div>
+                                            <div className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-[#1d1d1f]'}`}>{user.name}</div>
+                                            <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>{user.email}</div>
                                         </div>
                                         <button 
                                             onClick={() => handleRemoveUser(user.id)}

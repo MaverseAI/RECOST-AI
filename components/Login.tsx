@@ -41,12 +41,12 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
 
   // Styles
   const cardClass = isDarkMode
-    ? "bg-[#1C1C1E]/80 border border-white/5 shadow-2xl"
-    : "bg-white/80 border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]";
+    ? "bg-slate-800/70 backdrop-blur-[20px] border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+    : "bg-white/85 backdrop-blur-[20px] border border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.05)]";
     
   const inputClass = isDarkMode
-    ? "w-full px-4 py-4 bg-[#2C2C2E] border-none text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500 transition-all"
-    : "w-full px-4 py-4 bg-gray-50 border-none text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none placeholder-gray-400 transition-all shadow-inner";
+    ? "w-full px-4 py-4 bg-slate-800 border-none text-white rounded-xl focus:ring-2 focus:ring-[#5e13f6] outline-none placeholder-slate-500 transition-all"
+    : "w-full px-4 py-4 bg-gray-50 border-none text-[#1d1d1f] rounded-xl focus:ring-2 focus:ring-[#5e13f6] focus:bg-white outline-none placeholder-gray-400 transition-all shadow-inner";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 animate-fade-in-up">
@@ -64,20 +64,20 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
             <path d="M15 26V20C15 19.4477 15.4477 19 16 19H19V26M21 26V15C21 14.4477 21.4477 14 22 14H25V26" fill="url(#logoGradientLog)" fillOpacity="0.8" />
             </svg>
         </div>
-        <h1 className={`text-3xl font-extrabold mt-6 tracking-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <h1 className={`text-3xl font-extrabold mt-6 tracking-tight ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
             RECOST AI
         </h1>
-        <p className={`text-sm font-medium mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+        <p className={`text-sm font-medium mt-2 ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>
             Zaloguj się, aby kontynuować
         </p>
       </div>
 
       {/* Login Card */}
-      <div className={`w-full max-w-md backdrop-blur-md rounded-3xl p-8 ${cardClass}`}>
+      <div className={`w-full max-w-md rounded-3xl p-8 ${cardClass}`}>
         
         <form onSubmit={handleEmailLogin} className="space-y-6">
             <div>
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ml-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ml-1 ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>
                     Adres Email
                 </label>
                 <input 
@@ -99,7 +99,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
             <button 
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-[#5e13f6] to-[#8b5cf6] text-white py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-[#5e13f6]/30 transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isLoading ? 'Logowanie...' : 'Zaloguj przez Email'}
             </button>
@@ -107,10 +107,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
 
         <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-                <div className={`w-full border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
+                <div className={`w-full border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
             </div>
             <div className="relative flex justify-center text-sm">
-                <span className={`px-4 font-medium ${isDarkMode ? 'bg-[#1C1C1E] text-gray-500' : 'bg-white text-gray-400'}`}>lub</span>
+                <span className={`px-4 font-medium ${isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-white text-gray-400'}`}>lub</span>
             </div>
         </div>
 
@@ -129,7 +129,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
         </button>
 
         <div className="mt-8 text-center">
-            <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+            <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
                 Domyślny admin: <span className="font-mono">admin@recost.ai</span>
             </p>
         </div>

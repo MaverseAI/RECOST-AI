@@ -52,7 +52,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, isDarkMode }) => {
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 animate-fade-in-up">
       {/* Logo Section */}
       <div className="mb-10 text-center">
-        <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg overflow-hidden transition-transform duration-500 ${isDarkMode ? 'bg-[#1C1C1E] border border-gray-700' : 'bg-white border border-gray-100'}`}>
+        <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg overflow-hidden transition-transform duration-500 bg-white border border-gray-100`}>
             <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
             <defs>
                 <linearGradient id="logoGradientLog" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">

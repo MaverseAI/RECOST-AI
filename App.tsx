@@ -1032,7 +1032,7 @@ const App: React.FC = () => {
              onClick={resetFlow}
           >
             {/* LOGO */}
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 ${isDarkMode ? 'bg-[#1C1C1E] border border-gray-700' : 'bg-white border border-gray-100'}`}>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 bg-white border border-gray-100`}>
                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
                   <defs>
                     <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">

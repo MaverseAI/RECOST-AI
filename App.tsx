@@ -588,31 +588,29 @@ const App: React.FC = () => {
         
         {/* Document Preview Header (Only show if not manual mode) */}
         {!isManualMode && (
-            <div className={`relative h-64 rounded-3xl overflow-hidden mb-8 shadow-2xl ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+          <>
+            <div className="flex justify-between items-end mb-4 px-4">
+              <h2 className={`text-3xl font-bold tracking-tight ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
+                Weryfikacja
+              </h2>
+              <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md ${isDarkMode ? 'bg-white/10 text-slate-300' : 'bg-black/5 text-[#1d1d1f]'}`}>
+                AI Analysis
+              </span>
+            </div>
+
+            <div className={`relative w-full rounded-3xl overflow-hidden mb-8 shadow-2xl border ${isDarkMode ? 'bg-slate-800 border-white/10' : 'bg-white border-white/50'}`}>
                 {fileData && !isPdf && (
-                <img src={fileData} alt="Faktura" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-105" />
+                  <img src={fileData} alt="Faktura" className="w-full h-auto block opacity-90" />
                 )}
                 
                 {isPdf && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                <div className="flex flex-col items-center justify-center py-20 bg-gradient-to-br from-slate-800 to-slate-900">
                     <svg className="w-24 h-24 text-slate-400 mb-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
                     <span className="text-slate-400 font-medium">Dokument PDF</span>
                 </div>
                 )}
-                
-                <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-slate-900 via-slate-900/40' : 'from-[#F5F5F7] via-[#F5F5F7]/40'} to-transparent`}></div>
-
-                <div className="absolute bottom-0 left-0 p-8 w-full">
-                <div className="flex justify-between items-end">
-                    <h2 className={`text-3xl font-bold tracking-tight ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
-                    Weryfikacja
-                    </h2>
-                    <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md ${isDarkMode ? 'bg-white/20 text-white' : 'bg-black/10 text-black'}`}>
-                    AI Analysis
-                    </span>
-                </div>
-                </div>
             </div>
+          </>
         )}
 
         {/* Manual Mode Header */}
@@ -788,291 +786,216 @@ const App: React.FC = () => {
     );
   };
 
-  const renderSuccess = () => (
-    <div className={`flex flex-col items-center justify-center p-12 max-w-md mx-auto text-center space-y-8 animate-fade-in-up ${styles.card}`}>
-      <div className={`relative w-32 h-32 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-green-500/10' : 'bg-green-100'}`}>
-         <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${isDarkMode ? 'bg-green-500' : 'bg-green-400'}`}></div>
-         <svg className={`w-16 h-16 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-      </div>
-      <div>
-        <h2 className={`text-4xl font-bold tracking-tight mb-4 ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
-          Gotowe!
-        </h2>
-        <p className={`${styles.subTitle} text-base leading-relaxed mb-6`}>
-          {lastUploadLink 
-            ? 'Faktura została przeanalizowana i zapisana. Dane są w Arkuszu, a plik na Dysku Google.'
-            : 'Dane kosztu zostały zapisane w Arkuszu (bez pliku).'
-          }
-        </p>
-        
-        {lastUploadLink && (
-           <a 
-             href={lastUploadLink} 
-             target="_blank" 
-             rel="noopener noreferrer"
-             className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-bold transition-all transform hover:-translate-y-0.5 ${isDarkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-           >
-             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-             Zobacz na Dysku Google
-           </a>
-        )}
-      </div>
-      <button 
-        onClick={resetFlow}
-        className={styles.buttonPrimary}
-      >
-        Wróć do pulpitu
-      </button>
-    </div>
-  );
-
-  const renderKsefInbox = () => {
-    const activeProperties = properties.filter(p => !p.isArchived);
-
-    return (
-      <div className="w-full max-w-4xl mx-auto animate-fade-in-up pb-20">
-        <div className="flex items-center justify-between mb-8">
-           <button 
-             onClick={() => setStatus(ProcessingStatus.IDLE)}
-             className={`flex items-center group ${styles.buttonGhost}`}
-           >
-              <div className={`p-1 rounded-full mr-2 transition-colors ${isDarkMode ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-white group-hover:bg-gray-100'}`}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-              </div>
-              Wróć do pulpitu
-           </button>
-           <h2 className={`text-2xl font-bold tracking-tight ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
-              Skrzynka KSeF
-           </h2>
-        </div>
-
-        {ksefInvoices.length === 0 ? (
-           <div className={`text-center py-20 rounded-3xl border border-dashed ${isDarkMode ? "bg-white/5 border-white/10 text-slate-500" : "bg-white border-gray-200 text-[#86868b]"}`}>
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              <p className="text-lg font-medium">Wszystkie faktury zostały przetworzone.</p>
-           </div>
-        ) : (
-           <div className="grid gap-6">
-              {ksefInvoices.map(invoice => {
-                 const isProcessing = processingKsefId === invoice.id;
-                 const currentPropId = ksefPropertySelections[invoice.id] || selectedPropertyId || '';
-
-                 return (
-                    <div key={invoice.id} className={`${styles.card} relative overflow-hidden transition-all duration-300`}>
-                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                          
-                          {/* Invoice Info */}
-                          <div className="flex-1">
-                             <div className="flex items-center space-x-3 mb-2">
-                                <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md ${isDarkMode ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
-                                   Faktura VAT
-                                </span>
-                                <span className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
-                                   {invoice.date}
-                                </span>
-                             </div>
-                             <h3 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
-                                {invoice.sellerName}
-                             </h3>
-                             <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>
-                                Nr: {invoice.invoiceNumber}
-                             </p>
-                             
-                             <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                                <div>
-                                   <span className={`block text-xs font-medium ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>Netto</span>
-                                   <span className={`font-semibold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{invoice.netAmount.toFixed(2)}</span>
-                                </div>
-                                <div>
-                                   <span className={`block text-xs font-medium ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>VAT</span>
-                                   <span className={`font-semibold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{invoice.vatAmount.toFixed(2)}</span>
-                                </div>
-                                <div>
-                                   <span className={`block text-xs font-medium ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>Brutto</span>
-                                   <span className={`font-bold text-lg ${isDarkMode ? 'text-blue-400' : 'text-[#5e13f6]'}`}>{invoice.grossAmount.toFixed(2)} {invoice.currency}</span>
-                                </div>
-                             </div>
-                          </div>
-
-                          {/* Action Area */}
-                          <div className="w-full md:w-80 flex flex-col gap-4 bg-opacity-50 rounded-xl p-1">
-                             <div>
-                                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-slate-500' : 'text-[#86868b]'}`}>
-                                   Przypisz do nieruchomości
-                                </label>
-                                <div className="relative">
-                                    <select
-                                       value={currentPropId}
-                                       onChange={(e) => handleKsefPropertyChange(invoice.id, e.target.value)}
-                                       disabled={isProcessing}
-                                       className={`w-full p-3 pr-10 rounded-xl appearance-none outline-none font-medium transition-colors cursor-pointer border ${
-                                          isDarkMode 
-                                             ? 'bg-slate-800 border-slate-700 text-white hover:border-slate-600' 
-                                             : 'bg-white border-gray-200 text-[#1d1d1f] hover:border-gray-300 shadow-sm'
-                                       }`}
-                                    >
-                                       <option value="" disabled>Wybierz adres...</option>
-                                       {activeProperties.map(p => (
-                                          <option key={p.id} value={p.id}>{p.address}</option>
-                                       ))}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
-                             </div>
-
-                             <button
-                                onClick={() => handleApproveKsef(invoice)}
-                                disabled={isProcessing || !currentPropId}
-                                className={`w-full py-3 px-4 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center space-x-2 ${
-                                   !currentPropId 
-                                      ? (isDarkMode ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
-                                      : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-green-500/30 hover:scale-[1.02] active:scale-95'
-                                }`}
-                             >
-                                {isProcessing ? (
-                                   <>
-                                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
-                                      <span>Zapisywanie...</span>
-                                   </>
-                                ) : (
-                                   <>
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                      <span>Zatwierdź</span>
-                                   </>
-                                )}
-                             </button>
-                          </div>
-                       </div>
-                    </div>
-                 );
-              })}
-           </div>
-        )}
-      </div>
-    );
-  };
-
-  // Loading State
   if (isAuthLoading) {
     return (
-      <div className={styles.appContainer}>
-         {styles.backgroundBlobs}
-         <div className="flex items-center justify-center min-h-screen">
-             <Spinner isDarkMode={isDarkMode} />
-         </div>
+      <div className={styles.appContainer + " flex items-center justify-center"}>
+        {styles.backgroundBlobs}
+        <Spinner label="Ładowanie..." isDarkMode={isDarkMode} />
       </div>
     );
   }
 
-  // LOGIN SCREEN
   if (!currentUser) {
-      return (
-          <div className={styles.appContainer}>
-             {styles.backgroundBlobs}
-              {/* Theme Toggle Button for Login Screen */}
-             <div className="absolute top-6 right-6 z-50">
-                <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white text-[#86868b] hover:bg-gray-100 hover:text-[#1d1d1f] shadow-sm'}`}>
-                    {isDarkMode ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    )}
-                </button>
-             </div>
-             <Login onLoginSuccess={handleLoginSuccess} isDarkMode={isDarkMode} />
-          </div>
-      )
+    return (
+      <div className={styles.appContainer + " flex items-center justify-center"}>
+        {styles.backgroundBlobs}
+        <Login onLoginSuccess={handleLoginSuccess} isDarkMode={isDarkMode} />
+      </div>
+    );
   }
 
-  // MAIN APP
+  // --- MAIN RENDER ---
   return (
     <div className={styles.appContainer}>
       {styles.backgroundBlobs}
       
       {/* Navbar */}
       <nav className={styles.navbar}>
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div 
-             className="flex items-center space-x-4 cursor-pointer group" 
-             onClick={resetFlow}
-          >
-            {/* LOGO */}
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 bg-white border border-gray-100`}>
-               <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <defs>
-                    <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#3b82f6" />
-                      <stop offset="1" stopColor="#8b5cf6" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M10 10H14M10 10V14M30 10H26M30 10V14M10 30H14M10 30V26M30 30H26M30 30V26" stroke="url(#logoGradient)" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M15 26V20C15 19.4477 15.4477 19 16 19H19V26M21 26V15C21 14.4477 21.4477 14 22 14H25V26" fill="url(#logoGradient)" fillOpacity="0.8" />
-               </svg>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20">
+            <div 
+               className="flex items-center space-x-4 cursor-pointer group" 
+               onClick={resetFlow}
+            >
+              {/* LOGO */}
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0 transition-transform duration-500 bg-white border border-gray-100`}>
+                 <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                    <defs>
+                      <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#3b82f6" />
+                        <stop offset="1" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M10 10H14M10 10V14M30 10H26M30 10V14M10 30H14M10 30V26M30 30H26M30 30V26" stroke="url(#logoGradient)" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M15 26V20C15 19.4477 15.4477 19 16 19H19V26M21 26V15C21 14.4477 21.4477 14 22 14H25V26" fill="url(#logoGradient)" fillOpacity="0.8" />
+                 </svg>
+              </div>
+              
+              <div className="flex flex-col">
+                <h1 className={`text-xl font-extrabold tracking-tight leading-none ${isDarkMode ? 'text-white' : 'text-[#1d1d1f]'}`}>
+                  RECOST AI
+                </h1>
+                <span className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 ${isDarkMode ? 'text-indigo-400' : 'text-[#5e13f6]'}`}>
+                  Real Estate Cost Tracker
+                </span>
+              </div>
             </div>
             
-            <div className="flex flex-col">
-              <h1 className={`text-xl font-extrabold tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r ${isDarkMode ? 'from-white to-gray-400' : 'from-[#1d1d1f] to-gray-600'}`}>
-                RECOST AI
-              </h1>
-              <span className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 ${isDarkMode ? 'text-indigo-400' : 'text-[#5e13f6]'}`}>
-                Real Estate Cost Tracker
-              </span>
+            <div className="flex items-center space-x-2">
+               <button 
+                 onClick={toggleTheme}
+                 className={`p-2.5 rounded-full transition-all duration-300 ${isDarkMode ? 'bg-white/10 text-yellow-300 hover:bg-white/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+               >
+                 {isDarkMode ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                 ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                 )}
+               </button>
+               
+               <div 
+                 className={`w-10 h-10 rounded-full bg-gradient-to-br from-[#5e13f6] to-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm shadow-md cursor-pointer hover:scale-105 transition-transform`}
+                 onClick={() => setIsSettingsOpen(true)}
+               >
+                 {currentUser.email.charAt(0).toUpperCase()}
+               </div>
+
+               <button 
+                 onClick={handleLogout}
+                 className={`p-2.5 rounded-full transition-all duration-300 group ml-2 ${isDarkMode ? 'bg-white/10 text-slate-400 hover:bg-red-500/10 hover:text-red-500' : 'bg-gray-100 text-[#86868b] hover:bg-red-50 hover:text-red-600 shadow-sm'}`}
+                 title="Wyloguj"
+               >
+                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+               </button>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-             {status !== ProcessingStatus.IDLE && status !== ProcessingStatus.SELECT_METHOD && (
-                <button onClick={resetFlow} className={styles.buttonGhost}>
-                  Anuluj
-                </button>
-             )}
-             
-             {/* Settings Button */}
-             <button 
-                onClick={() => setIsSettingsOpen(true)}
-                className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white text-[#86868b] hover:bg-gray-100 hover:text-[#1d1d1f] shadow-sm'}`}
-             >
-                <svg className="w-5 h-5 transition-transform duration-700 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-             </button>
-
-             {/* Theme Toggle Button */}
-             <button onClick={toggleTheme} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-white text-[#86868b] hover:bg-gray-100 hover:text-[#1d1d1f] shadow-sm'}`} title="Zmień motyw">
-               {isDarkMode ? (
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                 </svg>
-               ) : (
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                 </svg>
-               )}
-             </button>
-
-             {/* Logout Button */}
-             <button onClick={handleLogout} className={`p-2.5 rounded-full transition-all duration-300 group ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-red-500/10 hover:text-red-500' : 'bg-white text-[#86868b] hover:bg-red-50 hover:text-red-600 shadow-sm'}`} title="Wyloguj">
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-             </button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* KSeF Inbox View */}
+        {status === ProcessingStatus.KSEF_INBOX && (
+           <div className="animate-fade-in-up max-w-4xl mx-auto pb-20">
+               <div className="flex items-center justify-between mb-8">
+                  <h2 className={`text-3xl font-bold tracking-tight ${isDarkMode ? 'text-slate-50' : 'text-[#1d1d1f]'}`}>
+                     Skrzynka Odbiorcza KSeF
+                  </h2>
+                  <button onClick={() => setStatus(ProcessingStatus.IDLE)} className={styles.buttonGhost}>
+                    Zamknij
+                  </button>
+               </div>
+               
+               {ksefInvoices.length === 0 ? (
+                  <div className={`text-center py-20 rounded-3xl ${isDarkMode ? "bg-slate-800/50 text-slate-500" : "bg-gray-50 text-gray-500"}`}>
+                     Wszystkie faktury zostały przetworzone.
+                  </div>
+               ) : (
+                 <div className="space-y-6">
+                    {ksefInvoices.map((inv) => (
+                       <div key={inv.id} className={`${styles.card} group hover:shadow-xl hover:-translate-y-1`}>
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                             
+                             {/* Data */}
+                             <div className="flex-1 space-y-1">
+                                <div className="flex items-center space-x-2">
+                                   <span className="text-xs font-bold uppercase tracking-wider text-[#5e13f6] bg-[#5e13f6]/10 px-2 py-0.5 rounded">KSeF</span>
+                                   <span className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{inv.invoiceNumber}</span>
+                                </div>
+                                <h3 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{inv.sellerName}</h3>
+                                <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>{inv.date}</p>
+                             </div>
+
+                             {/* Amount */}
+                             <div className="text-right">
+                                <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                   {inv.grossAmount.toFixed(2)} <span className="text-sm font-medium text-gray-400">{inv.currency}</span>
+                                </div>
+                                <div className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`}>brutto</div>
+                             </div>
+
+                             {/* Action */}
+                             <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                                <select 
+                                   className={`w-full sm:w-48 p-2.5 rounded-xl text-sm font-medium border-r-8 border-transparent outline-none cursor-pointer transition-all ${isDarkMode ? 'bg-slate-900 text-white hover:bg-black/40' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+                                   value={ksefPropertySelections[inv.id] || selectedPropertyId}
+                                   onChange={(e) => handleKsefPropertyChange(inv.id, e.target.value)}
+                                >
+                                   <option value="" disabled>Wybierz nieruchomość</option>
+                                   {properties.filter(p => !p.isArchived).map(p => (
+                                      <option key={p.id} value={p.id}>{p.address}</option>
+                                   ))}
+                                </select>
+                                
+                                <button 
+                                  onClick={() => handleApproveKsef(inv)}
+                                  disabled={processingKsefId === inv.id}
+                                  className="w-full sm:w-auto bg-[#5e13f6] hover:bg-[#4c0cd0] text-white px-6 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50"
+                                >
+                                   {processingKsefId === inv.id ? 'Zapisywanie...' : 'Zaksięguj'}
+                                </button>
+                             </div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+               )}
+           </div>
+        )}
+
+        {/* Dashboard View */}
         {status === ProcessingStatus.IDLE && renderDashboard()}
+
+        {/* Method Selection View */}
         {status === ProcessingStatus.SELECT_METHOD && renderMethodSelection()}
-        {status === ProcessingStatus.ANALYZING && <Spinner label="Przetwarzanie AI..." isDarkMode={isDarkMode} />}
+
+        {/* Processing/Loading States */}
+        {status === ProcessingStatus.ANALYZING && (
+          <Spinner label="Analiza AI w toku..." isDarkMode={isDarkMode} />
+        )}
+        
+        {status === ProcessingStatus.UPLOADING && (
+          <Spinner label="Wysyłanie do chmury..." isDarkMode={isDarkMode} />
+        )}
+
+        {/* Review View */}
         {status === ProcessingStatus.REVIEW && renderReview()}
-        {status === ProcessingStatus.UPLOADING && <Spinner label="Synchronizacja z Chmurą..." isDarkMode={isDarkMode} />}
-        {status === ProcessingStatus.SUCCESS && renderSuccess()}
-        {status === ProcessingStatus.KSEF_INBOX && renderKsefInbox()}
+
+        {/* Success View */}
+        {status === ProcessingStatus.SUCCESS && (
+          <div className="flex flex-col items-center justify-center py-20 animate-scale-in">
+             <div className="w-24 h-24 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/30 mb-6">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+             </div>
+             <h2 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-[#1d1d1f]'}`}>Gotowe!</h2>
+             <p className={`text-center max-w-md mb-8 ${isDarkMode ? 'text-slate-400' : 'text-[#86868b]'}`}>
+                {lastUploadLink 
+                   ? "Faktura została przetworzona i zapisana na Dysku Google oraz w Arkuszu."
+                   : "Dane zostały pomyślnie zapisane."}
+             </p>
+             
+             <div className="flex flex-col space-y-3 w-full max-w-xs">
+                {lastUploadLink && (
+                  <a 
+                    href={lastUploadLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-center transition-colors shadow-lg shadow-blue-600/20"
+                  >
+                    Otwórz folder
+                  </a>
+                )}
+                <button 
+                  onClick={resetFlow}
+                  className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-xl font-bold transition-colors"
+                >
+                  Wróć do startu
+                </button>
+             </div>
+          </div>
+        )}
+
       </main>
 
       {/* Modals */}
@@ -1080,19 +1003,20 @@ const App: React.FC = () => {
         <PropertyManager 
           properties={properties} 
           onSave={handlePropertySave} 
-          onClose={() => setIsPropertyManagerOpen(false)} 
+          onClose={() => setIsPropertyManagerOpen(false)}
           isDarkMode={isDarkMode}
           initialTab={propertyManagerInitialTab}
         />
       )}
-
+      
       {isSettingsOpen && currentUser && (
         <SettingsModal 
-          onClose={() => setIsSettingsOpen(false)}
-          isDarkMode={isDarkMode}
-          currentUser={currentUser}
+           currentUser={currentUser}
+           isDarkMode={isDarkMode}
+           onClose={() => setIsSettingsOpen(false)}
         />
       )}
+
     </div>
   );
 };
